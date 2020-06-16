@@ -1,0 +1,181 @@
+2020-06-01:
+    在ContentServiceImp类中，实现了大广告的缓存，在增加，删除的时候实现了，redis缓存的同步。
+2020-06-02：
+    一、ElasticSearch介绍
+       1、什么是elasticsearch?
+    	elasticsearch是基于lucene的全文检索服务器，对外提供restful接口
+
+       2、elasticsearch原理
+    	 正排索引：查字典时从第一页开始找，直到找到关键字为止（CTRL+F）
+    	 倒排索引：查字典时通过目录查找
+
+    	 逻辑结构：一个倒排索引表，由三部分组成
+    		document
+    		term
+    		term----关联----document
+
+    二、ES安装
+    	a、安装
+    		1、设置虚拟机内存>1.5G
+    		2、创建用户
+    		3、安装
+    			解压即安装
+    			配置elasticsearch.yml
+    		4、解决内核问题
+    		5、解决文件创建权限问题
+    		6、决绝线程开启限制问题
+    		7、解决虚拟机内存问题
+
+    	b、启动和关闭
+    		启动：
+    			./bin/elasticsearch
+    			./elasticsearch -d
+
+    		关闭：
+    			kill -9 pid
+
+    三、ES快速入门
+     1、index管理
+    	a、创建index
+    		PUT /java1906
+    		{
+    		   "settings"{
+    			"number_of_shards":2,
+    			"number_of_replicas":0 #备份分配不允许和主分片在同一个节点上
+    		   }
+    		}
+
+    	b、修改index
+    		PUT /java1906/_settings
+    		{
+    		  "number_of_replicas":1 #主分片不能修改【hash(doc_id)%number_of_shards=shard】
+    		}
+
+    	c、删除index
+    		DELETE /java1906
+
+     2、mapping管理
+    	a、关键mapping
+    		POST /java1906/course/_mapping
+    		{
+    			"properties":{
+    				"name":{
+    					"type":"text"
+    				}
+    			}
+    		}
+
+    	b、查询mapping
+    		GET /java1906/couse/_mapping
+
+      3、doucument管理
+    	a、创建doucment
+    		POST /java1907/couse/1
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    		POST /java1907/couse
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    		PUT /java1907/couse/1
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    	b、查询doucument
+    		GET /java1906/couse/1
+
+    	c、删除document
+    		DELETE /java1906/couse/1
+
+    四、IK分词器
+       1、安装
+    	解压到plugs目录下，并重命名为ik
+
+        2、自定义词库
+    	IkAnalyzer.cfg.xml：配置扩展词典和停用词典
+    	main.dic：扩展词典
+    	stopwords.dic：停用词典
+
+        3、两种分词模式
+    	ik_smart：粗粒度拆分
+    	ik_max_word：细粒度拆分
+2020-06-03：
+         1、文档的管理
+             1.1、添加文档
+             1.2、批量添加
+             1.3、修改文本
+             1.4、删除文本
+         2、文档搜索
+             2.1、match_all查询  全部查询
+             2.2、分页查询
+             2.3、match查询  单条件查询
+             2.4、multi_match查询   根据一个分词  查询多个字段
+             2.5、boot查询   多条件查询
+             2.6、filter查询  不需要计算相关度分数
+             2.7、highlight查询  高光
+2020-06-04：
+         1、highlight查询  高光
+         2、Elasticsearch集群搭建
+         3、Elasticsearch整合项目，将商品信息导入索引库中，
+2020-06-05：
+         1、搜索商品，以关键字搜索商品信息
+         2、添加商品的时候将数据同步到索引库中
+2020-06-08:
+         1、创建usian_detail_web工程
+         2、//搜索到商品，点击商品根据ID查看商品信息
+               @RequestMapping("/selectItemInfo")
+               public Result selectItemInfo(@RequestParam Long itemId)；
+         3、//根据Id查询商品详情数据信息
+               @RequestMapping("/selectItemDescByItemId")
+               public Result selectItemDescByItemId(@RequestParam Long itemId)
+         4、 //商品详情信息的规格参数信息
+               @RequestMapping("selectTbItemParamItemByItemId")
+               public Result selectTbItemParamItemByItemId(@RequestParam Long itemId)
+         5、解决缓存穿透的问题
+         6、解决缓存穿击的问题
+2020-06-09：
+         1、 //注册校验用户是否已经存在
+               @RequestMapping("/checkUserInfo/{checkValue}/{checkFlag}")
+               public Result checkUserInfo(@PathVariable String checkValue,@PathVariable Integer checkFlag)
+         2、 //注册用户信息
+               @RequestMapping("/userRegister")
+               public Result userRegister(TbUser tbUser)
+         3、//用户登录
+               @RequestMapping("/userLogin")
+               public Result userLogin(@RequestParam String username,@RequestParam String password)
+         4、//通过登录的时候存到cookie域的token中的数据查询用户信息，在页面展示欢迎XX登录
+               @RequestMapping("/getUserByToken/{token}")
+               public Result getUserByToken(@PathVariable String token)
+         5、 //退出登录清空用户信息
+               @RequestMapping("/logOut")
+               public Result logOut(@RequestParam String token)
+2020-06-10:
+         1、购物车信息，未登录，已登录
+         2、未登录//添加商品到购物车
+                  @RequestMapping("/addItem")
+                  public Result addItem(Long itemId,
+                                        String userId,
+                                        @RequestParam(defaultValue = "1")Integer num,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response)
+         3、 //查看购物车信息
+               @RequestMapping("/showCart")
+               public Result showCart(String userId,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response)
+         4、//修改cookie里的购物车中的数据的数量，增加数量
+               @RequestMapping("/updateItemNum")
+               public Result updateItemNum(Integer num,Long itemId,String userId,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response)
+         5、//删除购物车中商品信息
+               @RequestMapping("/deleteItemFromCart")
+               public Result deleteItemFromCart(Long itemId,String userId,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response)
+2020-06-16:
+         1、商品结算的时候进行拦截
+         2、查看订单页面商品详情
+            @RequestMapping("/goSettlement")
+               public Result goSettlement(String userId,String[] ids){

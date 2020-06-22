@@ -1,0 +1,242 @@
+2020-06-01:
+    在ContentServiceImp类中，实现了大广告的缓存，在增加，删除的时候实现了，redis缓存的同步。
+2020-06-02：
+    一、ElasticSearch介绍
+       1、什么是elasticsearch?
+    	elasticsearch是基于lucene的全文检索服务器，对外提供restful接口
+
+       2、elasticsearch原理
+    	 正排索引：查字典时从第一页开始找，直到找到关键字为止（CTRL+F）
+    	 倒排索引：查字典时通过目录查找
+
+    	 逻辑结构：一个倒排索引表，由三部分组成
+    		document
+    		term
+    		term----关联----document
+
+    二、ES安装
+    	a、安装
+    		1、设置虚拟机内存>1.5G
+    		2、创建用户
+    		3、安装
+    			解压即安装
+    			配置elasticsearch.yml
+    		4、解决内核问题
+    		5、解决文件创建权限问题
+    		6、决绝线程开启限制问题
+    		7、解决虚拟机内存问题
+
+    	b、启动和关闭
+    		启动：
+    			./bin/elasticsearch
+    			./elasticsearch -d
+
+    		关闭：
+    			kill -9 pid
+
+    三、ES快速入门
+     1、index管理
+    	a、创建index
+    		PUT /java1906
+    		{
+    		   "settings"{
+    			"number_of_shards":2,
+    			"number_of_replicas":0 #备份分配不允许和主分片在同一个节点上
+    		   }
+    		}
+
+    	b、修改index
+    		PUT /java1906/_settings
+    		{
+    		  "number_of_replicas":1 #主分片不能修改【hash(doc_id)%number_of_shards=shard】
+    		}
+
+    	c、删除index
+    		DELETE /java1906
+
+     2、mapping管理
+    	a、关键mapping
+    		POST /java1906/course/_mapping
+    		{
+    			"properties":{
+    				"name":{
+    					"type":"text"
+    				}
+    			}
+    		}
+
+    	b、查询mapping
+    		GET /java1906/couse/_mapping
+
+      3、doucument管理
+    	a、创建doucment
+    		POST /java1907/couse/1
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    		POST /java1907/couse
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    		PUT /java1907/couse/1
+    		{
+    			"name":"php从入门到放弃"
+    		}
+    	b、查询doucument
+    		GET /java1906/couse/1
+
+    	c、删除document
+    		DELETE /java1906/couse/1
+
+    四、IK分词器
+       1、安装
+    	解压到plugs目录下，并重命名为ik
+
+        2、自定义词库
+    	IkAnalyzer.cfg.xml：配置扩展词典和停用词典
+    	main.dic：扩展词典
+    	stopwords.dic：停用词典
+
+        3、两种分词模式
+    	ik_smart：粗粒度拆分
+    	ik_max_word：细粒度拆分
+2020-06-03：
+         1、文档的管理
+             1.1、添加文档
+             1.2、批量添加
+             1.3、修改文本
+             1.4、删除文本
+         2、文档搜索
+             2.1、match_all查询  全部查询
+             2.2、分页查询
+             2.3、match查询  单条件查询
+             2.4、multi_match查询   根据一个分词  查询多个字段
+             2.5、boot查询   多条件查询
+             2.6、filter查询  不需要计算相关度分数
+             2.7、highlight查询  高光
+2020-06-04：
+         1、highlight查询  高光
+         2、Elasticsearch集群搭建
+         3、Elasticsearch整合项目，将商品信息导入索引库中，
+2020-06-05：
+         1、搜索商品，以关键字搜索商品信息
+         2、添加商品的时候将数据同步到索引库中
+2020-06-08:
+         1、创建usian_detail_web工程
+         2、//搜索到商品，点击商品根据ID查看商品信息
+               @RequestMapping("/selectItemInfo")
+               public Result selectItemInfo(@RequestParam Long itemId)；
+         3、//根据Id查询商品详情数据信息
+               @RequestMapping("/selectItemDescByItemId")
+               public Result selectItemDescByItemId(@RequestParam Long itemId)
+         4、 //商品详情信息的规格参数信息
+               @RequestMapping("selectTbItemParamItemByItemId")
+               public Result selectTbItemParamItemByItemId(@RequestParam Long itemId)
+         5、解决缓存穿透的问题
+         6、解决缓存穿击的问题
+2020-06-09：
+         1、 //注册校验用户是否已经存在
+               @RequestMapping("/checkUserInfo/{checkValue}/{checkFlag}")
+               public Result checkUserInfo(@PathVariable String checkValue,@PathVariable Integer checkFlag)
+         2、 //注册用户信息
+               @RequestMapping("/userRegister")
+               public Result userRegister(TbUser tbUser)
+         3、//用户登录
+               @RequestMapping("/userLogin")
+               public Result userLogin(@RequestParam String username,@RequestParam String password)
+         4、//通过登录的时候存到cookie域的token中的数据查询用户信息，在页面展示欢迎XX登录
+               @RequestMapping("/getUserByToken/{token}")
+               public Result getUserByToken(@PathVariable String token)
+         5、 //退出登录清空用户信息
+               @RequestMapping("/logOut")
+               public Result logOut(@RequestParam String token)
+2020-06-10:
+         1、购物车信息，未登录，已登录
+         2、未登录//添加商品到购物车
+                  @RequestMapping("/addItem")
+                  public Result addItem(Long itemId,
+                                        String userId,
+                                        @RequestParam(defaultValue = "1")Integer num,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response)
+         3、 //查看购物车信息
+               @RequestMapping("/showCart")
+               public Result showCart(String userId,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response)
+         4、//修改cookie里的购物车中的数据的数量，增加数量
+               @RequestMapping("/updateItemNum")
+               public Result updateItemNum(Integer num,Long itemId,String userId,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response)
+         5、//删除购物车中商品信息
+               @RequestMapping("/deleteItemFromCart")
+               public Result deleteItemFromCart(Long itemId,String userId,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response)
+2020-06-16:
+         1、商品结算的时候进行拦截
+         2、查看订单页面商品详情
+            @RequestMapping("/goSettlement")
+               public Result goSettlement(String userId,String[] ids)
+2020-06-17:
+         1、提交订单
+            //提交订单商品的信息，将提交的订单商品信息保存到数据库
+                @RequestMapping("/insertOrder")
+                public Result insertOrder(String orderItem, TbOrderShipping tbOrderShipping, TbOrder tbOrder)
+         2、扣减库存
+              //通过MQ发送消息在提交订单购买成功后，扣除item中商品的库存数量
+                      amqpTemplate.convertAndSend("order_exchange","order.deleteNum",orderId);
+              //根据商品订单号修改商品库存数量
+                  @Override
+                  public Integer updateTbItemByOrderId(String orderId)
+2020-06-18:
+         1、  @Bean
+               public JobDetailFactoryBean getJobDetailFactoryBean(){
+               @Bean
+                   public CronTriggerFactoryBean getCronTriggerFactoryBean(JobDetailFactoryBean jobDetailFactoryBean){
+              @Bean
+                  public SchedulerFactoryBean getSchedulerFactoryBean(CronTriggerFactoryBean cronTriggerFactoryBean,MyAdaptabl
+               if(redisClient.setnx("SETNX_ORDER_LOCK_KEY",ip,30)){
+2020-06-19：
+         1、一、代理模式
+            1、作用：控制访问某个对象的方法，调用方法前可以做前置处理，调用方法后可以做后置处理（AOP的微观实现）
+            2、角色：
+           		抽象角色（接口）：定义公共对外方法
+           		真实角色（周杰伦）：业务逻辑
+           		代理角色（代理人）：调用真实角色完成业务逻辑，并可附加自己的操作
+
+           3、静态代理缺陷：
+           	     大量代码重复
+           	     只能代理一种类型的对象
+           4、动态代理
+           	a、jdk自带的动态代理
+           	     java.lang.reflect.InvocationHandler：通过invoke调用真实角色
+           	     java.lang.reflect.Proxy：动态生成代理类的对象
+
+           		好处：
+           		     大量代码重复
+           		     能代理任意类型的对象
+
+           	b、Cglib的动态代理
+           		和jdk代理的区别：没有接口
+           		原理：生成代理类的子类，在子类中调用父类并可附加自己的操作
+          5、 //记录本地消息表    将订单订单号，和订单的状态记录到本地
+          6、 public void sendMsg(LocalMessage localMessage) {
+                    RabbitTemplate rabbitTemplate = (RabbitTemplate) this.amqpTemplate;//将amqpTemplate接口转换为rabbitListener子类调用方法
+
+          7、 //作用：下游服务：  消息确认成功返回后调用
+                @Override
+                public void confirm(CorrelationData correlationData, boolean ack, String s) {
+
+2020-06-22：
+          1： System.out.println("执行扫描本地消息表的任务...." + new Date());
+                        List<LocalMessage> localMessages = localMessageService.selectLocalMessageByStatus(0);  //查询状态为0的消息发送失败的消息
+          2、  LocalMessage localMessage = JsonUtils.jsonToPojo(orderId, LocalMessage.class);  //将发送过来的消息进行转换
+                    DeDuplication deDuplications = deDuplicationService.selectDeDuplicationByTxNo(localMessage.getTxNo());  //查询去重表中这个消息
+                    if(deDuplications==null){   //如果这个消息为空说明消费成功
+                        Integer result = itemService.updateTbItemByOrderId(localMessage.getOrderNo());  //根据商品订单号修改商品库存数量
+          3、ELK介绍   三者结合
+               - Elasticsearch：是开源的分布式全文检索服务器。
+               - Logstash：是一个具有实时传输能力的数据收集引擎，用来进行数据收集（如：读取文本文件）、解析，并将数据发送给ES。
+               - Kibana：数据分析与可视化平台，对Elasticsearch存储的数据进行可视化分析，通过表格的形式展现出来
